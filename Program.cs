@@ -10,12 +10,12 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(opt => 
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DataBaseConnection")));
 builder.Services.AddEndpointsApiExplorer();
-
+builder.Services.AddCors();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipelinesssssss
-
+app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200","https://localhost:4200"));
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
