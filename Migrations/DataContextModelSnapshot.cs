@@ -21,7 +21,7 @@ namespace DatingApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DatingApp.Model.AppUsers", b =>
+            modelBuilder.Entity("DatingApp.Model.UserDetails", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,9 +33,17 @@ namespace DatingApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("istrPasswordHash")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("istrPasswordSalt")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("UserDetails");
                 });
 #pragma warning restore 612, 618
         }
