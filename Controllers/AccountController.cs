@@ -42,7 +42,7 @@ namespace DatingApp.Controllers
                 return BadRequest("User Allready Register.");
             }
         }
-        [HttpPost("Login")]
+        [HttpPost("Login")]//Account/Login
         public async Task<ActionResult<TokenDto>> Login(LogingDto logingDto)
         {
             UserDetails User = await _dbContext.UserDetails.FirstOrDefaultAsync(x => x.UserName.ToLower() == logingDto.UserName);
