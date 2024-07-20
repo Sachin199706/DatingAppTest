@@ -21,42 +21,45 @@ namespace DatingApp.Controllers
         [HttpPost("register")] //Account/register
         public async Task<ActionResult<UserDetails>> Register(RegisterDto register)
         {
-            if (!await UserExits(register.UserName))
-            {
-                using var hashCode = new HMACSHA512();
+            return Ok();
+            //if (!await UserExits(register.UserName))
+            //{
+            //    using var hashCode = new HMACSHA512();
 
-                UserDetails User = new UserDetails
-                {
-                    UserName = register.UserName,
-                    istrPasswordHash = hashCode.ComputeHash(Encoding.UTF8.GetBytes(register.Password)),
-                    istrPasswordSalt = hashCode.Key
-                };
+            //    UserDetails User = new UserDetails
+            //    {
+            //        UserName = register.UserName,
+            //        istrPasswordHash = hashCode.ComputeHash(Encoding.UTF8.GetBytes(register.Password)),
+            //        istrPasswordSalt = hashCode.Key
+            //    };
 
-                _dbContext.UserDetails.Add(User);
-                await _dbContext.SaveChangesAsync();
+            //    _dbContext.UserDetails.Add(User);
+            //    await _dbContext.SaveChangesAsync();
 
-                return User;
-            }
-            else
-            {
-                return BadRequest("User Allready Register.");
-            }
+            //    return User;
+            //}
+            //else
+            //{
+            //    return BadRequest("User Allready Register.");
+            //}
         }
         [HttpPost("Login")]//Account/Login
         public async Task<ActionResult<TokenDto>> Login(LogingDto logingDto)
         {
-            UserDetails User = await _dbContext.UserDetails.FirstOrDefaultAsync(x => x.UserName.ToLower() == logingDto.UserName);
+            UserDetails User = await _dbContext?.UserDetails?.FirstOrDefaultAsync(x => x.UserName.ToLower() == logingDto.UserName);
             if (User == null) return Unauthorized("Invalid User Name");
             using var hashCode = new HMACSHA512(User.istrPasswordSalt);
             byte[] CoumpeHashCode = hashCode.ComputeHash(Encoding.UTF8.GetBytes(logingDto.Password));
-            for (int i=0,ilen= CoumpeHashCode.Length; i < ilen; i++)
+            for (int i = 0, ilen = CoumpeHashCode.Length; i < ilen; i++)
             {
                 if (CoumpeHashCode[i] != User.istrPasswordHash[i]) return Unauthorized("Invalid Password");
             }
-            return new TokenDto {
+            return new TokenDto
+            {
                 UserName = User.UserName,
                 Token = _tokenService.CreateToken(User)
             };
+         
            
         }
         public async Task<bool> UserExits(string astrUserName)
