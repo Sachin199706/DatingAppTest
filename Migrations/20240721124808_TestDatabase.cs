@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DatingApp.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateEntity : Migration
+    public partial class TestDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,7 +27,7 @@ namespace DatingApp.Migrations
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Introduction = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Interests = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LokkingFor = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LookingFor = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Country = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },

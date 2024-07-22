@@ -89,7 +89,7 @@ namespace DatingApp.Migrations
                     b.Property<DateTime>("LastActive")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("LokkingFor")
+                    b.Property<string>("LookingFor")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")

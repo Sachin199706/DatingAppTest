@@ -13,9 +13,10 @@ namespace DatingApp.Controllers
     {
         public DataContext _dbContext { get; set; }
         public ITokenService _tokenService { get; set; }
-        public AccountController(DataContext dataContext,ITokenService token)
+        public IUserRepository _userRepository { get; set; }    
+        public AccountController(IUserRepository userRepository,ITokenService token)
         {
-            _dbContext = dataContext;
+            _userRepository = userRepository;
             _tokenService = token;
         }
         [HttpPost("register")] //Account/register
@@ -46,7 +47,7 @@ namespace DatingApp.Controllers
         [HttpPost("Login")]//Account/Login
         public async Task<ActionResult<TokenDto>> Login(LogingDto logingDto)
         {
-            UserDetails User = await _dbContext?.UserDetails?.FirstOrDefaultAsync(x => x.UserName.ToLower() == logingDto.UserName);
+            UserDetails User = await _userRepository.GetUserByUserNameAsync(logingDto.UserName);
             if (User == null) return Unauthorized("Invalid User Name");
             using var hashCode = new HMACSHA512(User.istrPasswordSalt);
             byte[] CoumpeHashCode = hashCode.ComputeHash(Encoding.UTF8.GetBytes(logingDto.Password));

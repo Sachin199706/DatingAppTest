@@ -11,7 +11,7 @@ using System.Net;
 
 namespace DatingApp.Controllers
 {
-    //[Authorize]
+  //  [Authorize]
     public class UserController : BaseAPIController
     {
         IUserRepository _userRepository;
@@ -41,7 +41,7 @@ namespace DatingApp.Controllers
                     Introduction = item.Introduction,
                     KnownAs = item.KnownAs,
                     LastActive = item.LastActive,
-                    LokkingFor = item.LokkingFor,
+                    LookingFor = item.LookingFor,
                     PhotoUrl = null,
                     UserName = item.UserName,
                     Age = item.Age(),
@@ -92,7 +92,7 @@ namespace DatingApp.Controllers
                 Introduction = user.Introduction,
                 KnownAs = user.KnownAs,
                 LastActive = user.LastActive,
-                LokkingFor = user.LokkingFor,
+                LookingFor = user.LookingFor,
                 PhotoUrl = null,
                 UserName = user.UserName,
                 Photos = []

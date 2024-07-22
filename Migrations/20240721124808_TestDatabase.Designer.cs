@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DatingApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240720080636_UpdateEntity")]
-    partial class UpdateEntity
+    [Migration("20240721124808_TestDatabase")]
+    partial class TestDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -92,7 +92,7 @@ namespace DatingApp.Migrations
                     b.Property<DateTime>("LastActive")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("LokkingFor")
+                    b.Property<string>("LookingFor")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
