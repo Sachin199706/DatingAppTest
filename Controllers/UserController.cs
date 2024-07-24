@@ -8,10 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters.Xml;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Security.Claims;
 
 namespace DatingApp.Controllers
 {
-  //  [Authorize]
+    //[Authorize]
     public class UserController : BaseAPIController
     {
         IUserRepository _userRepository;
@@ -109,5 +110,19 @@ namespace DatingApp.Controllers
             }
             return merberDto;
         }
+        [HttpPut("{username}")]
+
+        public async Task<ActionResult> UpdateUser(string username, MemberUpdateDto memberUpdateDto)
+        {
+            //var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //if (username == null) return BadRequest("No User found in token.");
+            var user = await _userRepository.GetUserByUserNameAsync(username?.ToString());
+            if (user == null) return BadRequest("Could not find User");
+            _mapper.Map(memberUpdateDto, user);
+            if (await _userRepository.SaveAllAsync()) return NoContent();
+            return BadRequest("Faild to update User");
+
+        }
+
     }
 }

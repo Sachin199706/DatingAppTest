@@ -8,7 +8,8 @@ namespace DatingApp.Helpers
     {
         public AutomapperProfiles() {
             CreateMap<UserDetails, MerberDto>(); 
-            CreateMap<UserDetails, PhotoDto>();    
+            CreateMap<UserDetails, PhotoDto>();
+            CreateMap<MemberUpdateDto, UserDetails>();
         }
     }
 }
