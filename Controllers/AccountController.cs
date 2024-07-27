@@ -11,13 +11,14 @@ namespace DatingApp.Controllers
 {
     public class AccountController : BaseAPIController
     {
-        public DataContext _dbContext { get; set; }
-        public ITokenService _tokenService { get; set; }
-        public IUserRepository _userRepository { get; set; }    
-        public AccountController(IUserRepository userRepository,ITokenService token)
+      public readonly DataContext _dbContext;
+        public readonly ITokenService _tokenService;
+        public readonly IUserRepository _userRepository;    
+        public AccountController(IUserRepository userRepository,ITokenService token, DataContext dbContext)
         {
             _userRepository = userRepository;
             _tokenService = token;
+            _dbContext = dbContext;
         }
         [HttpPost("register")] //Account/register
         public async Task<ActionResult<UserDetails>> Register(RegisterDto register)
@@ -47,7 +48,9 @@ namespace DatingApp.Controllers
         [HttpPost("Login")]//Account/Login
         public async Task<ActionResult<TokenDto>> Login(LogingDto logingDto)
         {
-            UserDetails User = await _userRepository.GetUserByUserNameAsync(logingDto.UserName);
+
+            UserDetails User = await _dbContext.UserDetails.Include(p => p.Photos).FirstOrDefaultAsync(x => x.UserName == logingDto.UserName.ToLower());
+                //await _userRepository.GetUserByUserNameAsync(logingDto.UserName);
             if (User == null) return Unauthorized("Invalid User Name");
             using var hashCode = new HMACSHA512(User.istrPasswordSalt);
             byte[] CoumpeHashCode = hashCode.ComputeHash(Encoding.UTF8.GetBytes(logingDto.Password));
@@ -58,14 +61,17 @@ namespace DatingApp.Controllers
             return new TokenDto
             {
                 UserName = User.UserName,
-                Token = _tokenService.CreateToken(User)
+                Token = _tokenService.CreateToken(User),
+                photoUrl = User.Photos.FirstOrDefault(x=>x.IsMain)?.URL
             };
          
            
         }
         public async Task<bool> UserExits(string astrUserName)
         {
-            return await _dbContext.UserDetails.AnyAsync(x => x.UserName.ToLower() == astrUserName.ToLower());
+           var user=  await _userRepository.GetUserByUserNameAsync(astrUserName);
+            if (user == null) return false;
+            return true;
         }
 
     }

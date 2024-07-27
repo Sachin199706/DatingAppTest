@@ -8,26 +8,30 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters.Xml;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 
 namespace DatingApp.Controllers
 {
     //[Authorize]
     public class UserController : BaseAPIController
     {
-        IUserRepository _userRepository;
-        IMapper _mapper;
-        public UserController(IUserRepository userRepository, IMapper mapper)
+        public readonly IUserRepository _userRepository;
+        public readonly IMapper _mapper;
+        public readonly IPhotoService _photoService;
+        public UserController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _photoService = photoService;
         }
         [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MerberDto>>> GetUsers()
         {
             var users = await _userRepository.GetUserAsync();
-            if(users==null) return NotFound();
+            if (users == null) return NotFound();
             List<MerberDto> merberDtos = new List<MerberDto>();
             foreach (UserDetails item in users)
             {
@@ -50,25 +54,25 @@ namespace DatingApp.Controllers
                 };
                 if (item.Photos != null)
                 {
-                   
+
                     foreach (Photo photo in item.Photos)
                     {
                         PhotoDto ph = new PhotoDto
                         {
-                            Id=photo.Id,
+                            Id = photo.Id,
                             IsMain = photo.IsMain,
-                            Url= photo.URL
-                        
+                            Url = photo.URL
+
                         };
-                        if(photo.IsMain==true) merberDto.PhotoUrl= photo.URL;
+                        if (photo.IsMain == true) merberDto.PhotoUrl = photo.URL;
                         merberDto.Photos.Add(ph);
 
                     }
                 }
-                    merberDtos.Add(merberDto);
+                merberDtos.Add(merberDto);
             }
-           
-    
+
+
             return Ok(merberDtos);
 
 
@@ -98,14 +102,15 @@ namespace DatingApp.Controllers
                 UserName = user.UserName,
                 Photos = []
             };
-            foreach (Photo photo in user.Photos) {
+            foreach (Photo photo in user.Photos)
+            {
                 PhotoDto ph = new PhotoDto
                 {
                     Id = photo.Id,
                     IsMain = photo.IsMain,
-                    Url=photo.URL
+                    Url = photo.URL
                 };
-                if(photo.IsMain==true) merberDto.PhotoUrl= photo.URL;
+                if (photo.IsMain == true) merberDto.PhotoUrl = photo.URL;
                 merberDto.Photos.Add(ph);
             }
             return merberDto;
@@ -123,6 +128,66 @@ namespace DatingApp.Controllers
             return BadRequest("Faild to update User");
 
         }
+       //http:5000/api/User/add-photo/username
+        [HttpPost("add-photo/{username}")]
+        public async Task<ActionResult<PhotoDto>> AddPhoto(string username, IFormFile file)
+        {
+            var user = await _userRepository.GetUserByUserNameAsync(username);
+            if (user == null) return BadRequest("Could not find User");
+            var result = await _photoService.AddPhotoAsync(file);
+            if (result.Error != null) return BadRequest(result.Error.Message);
+            Photo photo = new Photo
+            {
+                URL = result.SecureUrl.AbsoluteUri,
+                PublicID = result.PublicId
+            };
+            user.Photos.Add(photo);
+            if (await _userRepository.SaveAllAsync()) {
+                PhotoDto photoDto = new PhotoDto
+                {
+                    Id = photo.Id,
+                    IsMain = photo.IsMain,
+                    Url = photo.URL,
+                
+                };
+                return CreatedAtAction(nameof(GetUesr),new {username= user.UserName}, photoDto);
+        }
+
+
+            return BadRequest("Problem Add Your Photo");
+        }
+
+        [HttpPut("set-main-photo/{username}/{photoId:int}")]
+        public async Task <ActionResult> SetPhoto(string username ,int photoId)
+        {
+            var user =await  _userRepository.GetUserByUserNameAsync(username);
+            if (user == null) return BadRequest("Could not find User");
+
+            var Photo = user.Photos.FirstOrDefault(x=>x.Id==photoId);
+            if (Photo == null || Photo.IsMain) return BadRequest("Can not use this is main photo");
+            var currentPhoto = user.Photos.FirstOrDefault(x => x.IsMain);
+            if(currentPhoto!=null) currentPhoto.IsMain = false;
+            Photo.IsMain = true;
+            if(await _userRepository.SaveAllAsync()) return NoContent();
+            return BadRequest("Problem are setting in main photo");
+        }
+        [HttpDelete("delete-photo/{username}/{photoId:int}")]
+        public async Task<ActionResult> DeletePhoto(string username,int photoId)
+        {
+            var user = await _userRepository.GetUserByUserNameAsync(username);
+            if (user == null) return BadRequest("Could not find User");
+            var Photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+            if (Photo == null || Photo.IsMain) return BadRequest("Can not delete that photo");
+            if(Photo.PublicID!=null)
+            {
+                var result = await _photoService.DeletePhotoAsync(Photo.PublicID);
+                if(result.Error!=null) return  BadRequest(result.Error.Message);
+            }
+            user.Photos.Remove(Photo);
+            if (await _userRepository.SaveAllAsync()) return Ok();
+            return BadRequest("Problem for Delete Photo");
+        }
 
     }
+
 }
