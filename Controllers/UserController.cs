@@ -121,7 +121,7 @@ namespace DatingApp.Controllers
         {
             //var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             //if (username == null) return BadRequest("No User found in token.");
-            var user = await _userRepository.GetUserByUserNameAsync(username?.ToString());
+            var user = await _userRepository.GetUserByUserNameAsync(username);
             if (user == null) return BadRequest("Could not find User");
             _mapper.Map(memberUpdateDto, user);
             if (await _userRepository.SaveAllAsync()) return NoContent();
@@ -141,6 +141,8 @@ namespace DatingApp.Controllers
                 URL = result.SecureUrl.AbsoluteUri,
                 PublicID = result.PublicId
             };
+            if(user.Photos.Count==0) 
+                photo.IsMain = true;
             user.Photos.Add(photo);
             if (await _userRepository.SaveAllAsync()) {
                 PhotoDto photoDto = new PhotoDto

@@ -5,9 +5,21 @@ namespace DatingApp.DTOs
     {
 
         [Required]
-        public  string UserName { get; set; }=string.Empty;
+        public  string username { get; set; } =string.Empty;
         [Required]
-        [StringLength(8,MinimumLength =4)]
-        public  string Password { get; set; }=string.Empty;
+        public  string KnowsAs { get; set; }=string.Empty;
+        [Required]
+        public string? gender { get; set; }
+        [Required]
+        public string? dateOfBirth { get; set; }
+
+        [Required]
+        public string? city { get; set; }
+
+        [Required]
+        public string? counry { get; set; }
+
+        [Required]
+        public  string? password { get; set; }
     }
 }

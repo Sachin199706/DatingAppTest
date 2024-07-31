@@ -21,29 +21,42 @@ namespace DatingApp.Controllers
             _dbContext = dbContext;
         }
         [HttpPost("register")] //Account/register
-        public async Task<ActionResult<UserDetails>> Register(RegisterDto register)
+        public async Task<ActionResult<TokenDto>> Register(RegisterDto register)
         {
-            return Ok();
-            //if (!await UserExits(register.UserName))
-            //{
-            //    using var hashCode = new HMACSHA512();
 
-            //    UserDetails User = new UserDetails
-            //    {
-            //        UserName = register.UserName,
-            //        istrPasswordHash = hashCode.ComputeHash(Encoding.UTF8.GetBytes(register.Password)),
-            //        istrPasswordSalt = hashCode.Key
-            //    };
+            if (!await UserExits(register.username))
+            {
+                using var hashCode = new HMACSHA512();
 
-            //    _dbContext.UserDetails.Add(User);
-            //    await _dbContext.SaveChangesAsync();
+                UserDetails User = new UserDetails
+                {
+                    UserName = register.username,
+                    istrPasswordHash = hashCode.ComputeHash(Encoding.UTF8.GetBytes(register.password)),
+                    istrPasswordSalt = hashCode.Key,
+                    City=register.city,
+                    Country=register.counry,
+                    Gender = register.gender,
+                    KnownAs = register.KnowsAs,
+                    DateofBerth = DateOnly.Parse(register.dateOfBirth)
+                    
+                };
 
-            //    return User;
-            //}
-            //else
-            //{
-            //    return BadRequest("User Allready Register.");
-            //}
+                _dbContext.UserDetails.Add(User);
+                await _dbContext.SaveChangesAsync();
+
+                return new TokenDto
+                {
+                    UserName = User.UserName,
+                    Token = _tokenService.CreateToken(User),
+                    photoUrl = User.Photos.FirstOrDefault(x => x.IsMain)?.URL,
+                    KnowAS = User.KnownAs
+                };
+                
+            }
+            else
+            {
+                return BadRequest("User Allready Register.");
+            }
         }
         [HttpPost("Login")]//Account/Login
         public async Task<ActionResult<TokenDto>> Login(LogingDto logingDto)
@@ -62,7 +75,8 @@ namespace DatingApp.Controllers
             {
                 UserName = User.UserName,
                 Token = _tokenService.CreateToken(User),
-                photoUrl = User.Photos.FirstOrDefault(x=>x.IsMain)?.URL
+                photoUrl = User.Photos.FirstOrDefault(x=>x.IsMain)?.URL,
+                KnowAS=User.KnownAs
             };
          
            
