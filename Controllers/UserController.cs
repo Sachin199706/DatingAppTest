@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using DatingApp.Data;
 using DatingApp.DTOs;
+using DatingApp.Extension;
+using DatingApp.Helpers;
 using DatingApp.Interface;
 using DatingApp.Model;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +29,14 @@ namespace DatingApp.Controllers
             _photoService = photoService;
         }
         [AllowAnonymous]
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<MerberDto>>> GetUsers([FromQuery] UserParama userParama)
+        //{
+        //    var user = await _userRepository.GetMemberAsync(userParama);
+        //    Response.AddPaginationHeader(user);
+        //    return Ok(user);
+
+        //}
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MerberDto>>> GetUsers()
         {
